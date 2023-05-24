@@ -45,7 +45,14 @@ struct m_template {
 struct m_unboundScript {
     Persistent<UnboundScript> ptr;
 };
-
+static void buildCallArguments(Isolate *iso,
+                               Local<Value> *argv,
+                               int argc,
+                               ValuePtr args[]) {
+    for (int i = 0; i < argc; i++) {
+        argv[i] = args[i]->ptr.Get(iso);
+    }
+}
 const char *CopyString(std::string str) {
     int len = str.length();
     char *mem = (char *) malloc(len + 1);
@@ -799,6 +806,22 @@ ValuePtr ContextGlobal(ContextPtr ctx) {
   }                                        \
   Context::Scope context_scope(local_ctx); \
   Local<Value> value = val->ptr.Get(iso);
+
+ValuePtr NewValueArray(IsolatePtr iso,ValuePtr elements[], int32_t size) {
+    ISOLATE_SCOPE_INTERNAL_CONTEXT(iso);
+    TryCatch try_catch(iso);
+    Local<Context> local_ctx = ctx->ptr.Get(iso);
+    Context::Scope context_scope(local_ctx);
+    Local<Value>* args=new Local<Value>[size];
+    if (size>0) {
+        buildCallArguments(iso, args, size, elements);
+    }
+    m_value *val = new m_value;
+    val->iso = iso;
+    val->ctx = ctx;
+    val->ptr = Persistent<Value, CopyablePersistentTraits<Value>>(iso,Array::New(iso,args,size) );
+    return tracked_value(ctx, val);
+}
 
 ValuePtr NewValueInteger(IsolatePtr iso, int32_t v) {
     ISOLATE_SCOPE_INTERNAL_CONTEXT(iso);
@@ -1583,14 +1606,7 @@ ValuePtr PromiseResult(ValuePtr ptr) {
 
 /********** Function **********/
 
-static void buildCallArguments(Isolate *iso,
-                               Local<Value> *argv,
-                               int argc,
-                               ValuePtr args[]) {
-    for (int i = 0; i < argc; i++) {
-        argv[i] = args[i]->ptr.Get(iso);
-    }
-}
+
 
 RtnValue FunctionCall(ValuePtr ptr, ValuePtr recv, int argc, ValuePtr args[]) {
     LOCAL_VALUE(ptr)
