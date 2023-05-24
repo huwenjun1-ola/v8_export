@@ -29,6 +29,7 @@ else ()
 endif ()
 
 add_definitions(-DCOMPILE_EXPORT)
+add_definitions( -DTHREAD_SAFE)
 add_definitions(-DV8_COMPRESS_POINTERS -DV8_31BIT_SMIS_ON_64BIT_ARCH)
 FILE(GLOB SOURCE_FILES *.cc *.cpp)
 FILE(GLOB HEADER_FILES *.h *.hpp)

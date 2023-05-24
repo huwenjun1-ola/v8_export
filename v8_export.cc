@@ -1681,7 +1681,10 @@ RawInspectorClientPtr NewInspectorClient(ContextPtr ctx, int32_t port) {
     auto ptr = CreateV8Inspector(port, &local_ctx);
     return RawInspectorClientPtr(ptr);
 }
-
+void InspectorClose(RawInspectorClientPtr ptr) {
+    V8AbstractInspector *inspector = (V8AbstractInspector *) ptr;
+     delete(inspector);
+}
 bool InspectorTick(RawInspectorClientPtr ptr) {
     V8AbstractInspector *inspector = (V8AbstractInspector *) ptr;
     return inspector->Tick();
