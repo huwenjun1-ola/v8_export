@@ -43,3 +43,9 @@ else ()
 endif ()
 
 
+add_executable(test main.cpp)
+if (MSVC)
+    target_link_libraries(v8_export v8.dll.lib v8_libbase.dll.lib v8_libplatform.dll.lib zlib.dll.lib boost_system.lib)
+else ()
+    target_link_libraries(test v8_export v8_monolith v8_libbase v8_libplatform boost_system)
+endif ()
